@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Capture centre{% endblock %}
+{% block content %}
+<div class="w-100 text-center">
+    {% if error %}
+    <p class="text-danger">{{ error }}</p>µ
+    {% endif %}
+    <p>Click the button below to capture {{ 'a' if not screenshot else 'another' }} screenshot from the current video source.</p>
+    <form action="/" method="POST">
+        <p><button type="submit" class="btn btn-danger">Capture screenshot</button></p>
+    </form>
+    {% if not screenshot %}
+    <p class="text-secondary">Your screenshot will appear here.</p>
+    {% else %}
+    <img class="screenshot" src="{{ url_for('latest_screenshot') }}">
+    {% endif %}
+</div>
+{% endblock %}
