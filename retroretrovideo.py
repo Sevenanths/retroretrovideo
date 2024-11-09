@@ -54,4 +54,4 @@ def latest_screenshot():
     return send_file(SCREENSHOT_PATH, mimetype='image/png')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=args.port)
+    app.run(debug=True, port=args.port, host="0.0.0.0")
