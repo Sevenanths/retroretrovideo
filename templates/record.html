@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Recording centre{% endblock %}
+{% block content %}
+<div class="w-100 text-center">
+    {% if error %}
+    <p class="text-danger">{{ error }}</p>µ
+    {% endif %}
+    <p>Click the button below to record {{ 'a' if not video else 'another' }} video from the current video source.</p>
+    <form action="/record" method="POST">
+        <p><button type="submit" class="btn btn-danger">{{ 'Start' if not recording_ongoing else 'Stop' }} recording</button></p>
+    </form>
+    {% if not video %}
+    <p class="text-secondary">Your video will appear here.</p>
+    {% else %}
+    <video width="960" height="540" controls>
+        <source src="{{ url_for('latest_video') }}?v={{ range(1, 2048) | random }}" type="video/mp4">
+    </video>
+    {% endif %}
+</div>
+{% endblock %}
