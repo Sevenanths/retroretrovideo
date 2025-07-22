@@ -9,6 +9,8 @@ import base64
 import threading
 import subprocess
 
+from retroretrovideo.flashback import FlashbackRecorder
+
 app = Flask(__name__)
 app.secret_key = 'secret_key_for_sessions'
 #socketio = SocketIO(app)
@@ -26,6 +28,7 @@ parser.add_argument('--port', type=int, nargs='?', default="5000", help='Port to
 args = parser.parse_args()
 
 recording_process = None
+flashback_process = None
 
 def is_ffmpeg_installed():
     try:
@@ -110,6 +113,43 @@ def record_stop():
         stop_recording()
         return jsonify({"status": "Recording stopped"})
     return jsonify({"status": "Not recording"})
+
+@app.route('/flashback/start', methods=['GET'])
+def flashback_start():
+    global flashback_process
+
+    if flashback_process is None:
+        flashback_process = FlashbackRecorder(args.stream_url, 30)
+        # Start buffering in the background
+        threading.Thread(target=flashback_process.start_buffering).start()
+    
+        return jsonify({"status": "Flashback recording started"})
+    
+    return jsonify({"status": "Already buffering"})
+
+@app.route('/flashback/stop', methods=['GET'])
+def flashback_stop():
+    global flashback_process
+    if flashback_process is not None:
+        flashback_process.save_flashback()
+        flashback_process = None
+
+        flashback_start()
+
+        return jsonify({"status": "Flashback recording saved"})
+    return jsonify({"status": "No current buffer"})
+
+@app.route('/flashback/trigger', methods=["GET"])
+def flashback_trigger():
+    global flashback_process
+
+    if flashback_process is not None:
+        if not flashback_process.is_recording:
+          return jsonify({"status": "Flashback recording is being saved"})
+        
+        return flashback_stop()
+    else:
+        return jsonify({"status": "Flashback recording not running"})
 
 @app.route('/latest_screenshot', methods=['GET'])
 def latest_screenshot():
